@@ -11,8 +11,6 @@ from sklearn.preprocessing import FunctionTransformer, RobustScaler
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
-from sklearn.compose import ColumnTransformer
-from imblearn.combine import SMOTETomek
 
 from src.utils import save_object
 
@@ -23,15 +21,21 @@ class DataTrasnformationConfig:
 class DataTransformation:
     def __init__(self):
         self.data_transformation_config = DataTrasnformationConfig()
+        
+    # define custom function to replace 'NA' with np.nan
+    def replace_na_with_nan(self,X):
+        return np.where(X == 'na', np.nan, X)
 
     def get_data_transformer_object(self):
         try:
-            # define the steps for the preprocessor pipeline
+            # Define the steps for the preprocessor pipeline
+            nan_replacement_step = ('nan_replacement', FunctionTransformer(self.replace_na_with_nan))
             imputer_step = ('imputer', SimpleImputer(strategy='constant', fill_value=0))
             scaler_step = ('scaler', RobustScaler())
 
             preprocessor = Pipeline(
                 steps=[
+                nan_replacement_step,
                 imputer_step,
                 scaler_step
                 ]
@@ -49,10 +53,6 @@ class DataTransformation:
 
             logging.info("Read train and test data is completed")
 
-            logging.info("Obtaining preprocessing object")
-
-            preprocessor = self.get_data_transformer_object()
-
             target_column_name = "Good/Bad"
             target_column_mapping = {"+1": 0, "-1": 1}
 
@@ -65,6 +65,9 @@ class DataTransformation:
             # testing dataframe
             input_test_df = test_df.drop(target_column_name, axis = 1)
             target_test_df = test_df[target_column_name]. map(target_column_mapping)
+
+            logging.info("Obtaining preprocessing object")
+            preprocessor = self.get_data_transformer_object()
 
             logging.info("Applying preprocessing object on training and testing datasets.")
 
@@ -82,6 +85,8 @@ class DataTransformation:
             # train_arr = np.c_[final_input_train_df, np.array(final_target_train_df)]
 
             # test_arr = np.c_[final_input_test_df, np.array(final_target_test_df)]
+
+
 
             # concating train and test arr with target arr
             train_arr = np.c_[transformed_input_train_df, np.array(target_train_df)]

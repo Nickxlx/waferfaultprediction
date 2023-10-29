@@ -54,20 +54,18 @@ def evaluate_models(X,y, models):
         report = {}
 
         for model_name, model_instance in models.items():
-            # model Building
-            model = model_instance()
-            
-            # model Training 
-            model.fit(x_train, y_train)
+            # Train model
+            model_instance.fit(x_train, y_train)
 
-            # model report
-            y_pred  = model.predict(x_test)
+            # Predict Testing data
+            y_test_pred = model_instance.predict(x_test)
 
-            score = r2_score(x_test, y_pred)
-            
+            # Calculate the R2 score for the test data
+            test_model_score = r2_score(y_test, y_test_pred)
+
             # Store the score in the report dictionary with the model name as the key and value as score
-            report[model_name] = score
-            
+            report[model_name] = test_model_score
+
         return report  # Return the evaluation report
 
     except Exception as e:
