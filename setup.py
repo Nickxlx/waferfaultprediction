@@ -21,6 +21,6 @@ setup(
     version="0.0.1",
     author="Nick",
     author_email="nikhilsingxlx@gmail.com",
-    packages=find_packages(),
+    packages=find_packages("requirements.txt"),
     install_requires=[]
 )
